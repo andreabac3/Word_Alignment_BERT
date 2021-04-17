@@ -15,7 +15,7 @@ _, decoded = wa.get_alignment(sentence1, sentence2, calculate_decode=True)
 for (sentence1_w, sentence2_w) in decoded:
     print(sentence1_w, sentence2_w)
 ```
-Output:
+The output
 ```
 Today           ---> Oggi
 I               ---> io
