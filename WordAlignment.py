@@ -34,6 +34,9 @@ class WordAlignment:
                 indices.append(idx_word)
         return indices
 
+    def __repr__(self):
+        return f"Bert Model: {self.model.name_or_path} Device: {self.model.device}"
+
     @staticmethod
     def mean_pooling_strategy(bert_output: Tuple[torch.Tensor], dimension: int = 4):
         return torch.mean(torch.stack(bert_output[:-dimension], dim=-1), dim=-1)[:, 1:-1, :]
@@ -57,11 +60,14 @@ class WordAlignment:
     def decode(self, indices_align: List[int], sentence1, sentence2) -> List[List[str]]:
         return [[word, sentence2[indices_align[idx]]] for idx, word in enumerate(sentence1)]
 
-    def get_alignment(self, sentence1: List[str], sentence2: List[str], calculate_decode: bool = True) -> Tuple[List[int], List[List[str]]]:
+    def get_alignment(self, first_sentence: List[str], second_sentence: List[str], calculate_decode: bool = True) -> Tuple[List[int], List[List[str]]]:
+        len_sentence1 = len(first_sentence)
+        sentence1 = first_sentence.copy()
+        sentence2 = second_sentence.copy()
         self.pad_sentence(sentence1, sentence2)
         sentence1_vector: torch.Tensor = self.get_sentence_representation(sentence1)
         sentence2_vector: torch.Tensor = self.get_sentence_representation(sentence2)
         cosine_similarity_matrix: torch.Tensor = self.obtain_cosine_similarity_matrix(sentence1_vector, sentence2_vector)
         indices_align: List[int] = [torch.argmax(cosine_similarity_matrix[0][:, i]).data for i in range(len(sentence1))]
         decoded: List[List[str]] = self.decode(indices_align, sentence1, sentence2) if calculate_decode else None
-        return indices_align, decoded
+        return indices_align[:len_sentence1], decoded[:len_sentence1]
