@@ -1,0 +1,14 @@
+#!/bin/bash
+
+
+
+read -rp "Enter cuda version (e.g. '10.1' or 'cpu' to avoid installing cuda support): " cuda_version
+
+if [ "$cuda_version" == "cpu" ]; then
+  pip3 install -r requirements.txt
+else
+  read -rp "Enter torch version (e.g. 1.8.0): " torch_version
+  pip3 install torch-scatter -f https://pytorch-geometric.com/whl/torch-${torch_version}+${cuda_version}.html
+  pip3 install -r requirements.txt
+fi
+python3 main.py
