@@ -24,7 +24,7 @@ class WordAlignment:
 
     @staticmethod
     def obtain_cosine_similarity_matrix(source, target):
-        return cosine_similarity(source[..., None, :, :], target[..., :, None, :], dim=-1)
+        return cosine_similarity(source[..., None, :, :], target[..., :, None, :], dim=-1)[0]
 
     def indices_word_pieces(self, sentence: List[str]) -> List[int]:
         indices = []
@@ -68,6 +68,6 @@ class WordAlignment:
         sentence1_vector: torch.Tensor = self.get_sentence_representation(sentence1)
         sentence2_vector: torch.Tensor = self.get_sentence_representation(sentence2)
         cosine_similarity_matrix: torch.Tensor = self.obtain_cosine_similarity_matrix(sentence1_vector, sentence2_vector)
-        indices_align: List[int] = [torch.argmax(cosine_similarity_matrix[0][:, i]).data for i in range(len(sentence1))]
-        decoded: List[List[str]] = self.decode(indices_align, sentence1, sentence2) if calculate_decode else None
-        return indices_align[:len_sentence1], decoded[:len_sentence1]
+        indices_align: List[int] = [torch.argmax(cosine_similarity_matrix[:, i]).data for i in range(len(sentence1))]
+        decoded: List[List[str]] = self.decode(indices_align, sentence1, sentence2)[:len_sentence1] if calculate_decode else None
+        return indices_align[:len_sentence1], decoded

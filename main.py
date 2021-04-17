@@ -14,3 +14,4 @@ if __name__ == "__main__":
     _, decoded = wa.get_alignment(sentence2, sentence1, calculate_decode=True)
     for (sentence2_w, sentence1_w) in decoded:
         print(sentence2_w, "\t--->", sentence1_w)
+
