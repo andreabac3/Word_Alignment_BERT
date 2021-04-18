@@ -51,14 +51,14 @@ class WordAlignment:
         diff = abs(len(source) - len(target))
         if diff == 0:
             return
-        pad_vector: List[str] = ["<pad>" for _ in range(diff)]
+        pad_vector: List[str] = ["[PAD]" for _ in range(diff)]
         if len(source) > len(target):
             target.extend(pad_vector)
         if len(target) > len(source):
             source.extend(pad_vector)
 
-    def decode(self, indices_align: List[int], sentence1, sentence2) -> List[List[str]]:
-        return [[word, sentence2[indices_align[idx]]] for idx, word in enumerate(sentence1)]
+    def decode(self, indices_align: torch.Tensor, sentence1: List[str], sentence2: List[str]) -> List[List[str]]:
+        return [[word, sentence2[idx]] for idx, word in zip(indices_align, sentence1)]
 
     def get_alignment(self, first_sentence: List[str], second_sentence: List[str], calculate_decode: bool = True) -> Tuple[List[int], List[List[str]]]:
         len_sentence1 = len(first_sentence)
@@ -68,6 +68,6 @@ class WordAlignment:
         sentence1_vector: torch.Tensor = self.get_sentence_representation(sentence1)
         sentence2_vector: torch.Tensor = self.get_sentence_representation(sentence2)
         cosine_similarity_matrix: torch.Tensor = self.obtain_cosine_similarity_matrix(sentence1_vector, sentence2_vector)
-        indices_align: List[int] = [torch.argmax(cosine_similarity_matrix[:, i]).data for i in range(len(sentence1))]
+        indices_align: torch.Tensor = torch.argmax(cosine_similarity_matrix.T, dim=-1)
         decoded: List[List[str]] = self.decode(indices_align, sentence1, sentence2)[:len_sentence1] if calculate_decode else None
         return indices_align[:len_sentence1], decoded

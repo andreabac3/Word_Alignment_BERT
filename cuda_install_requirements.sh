@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 read -rp "Enter cuda version (e.g. '10.1' or 'cpu' to avoid installing cuda support): " cuda_version
 
 if [ "$cuda_version" == "cpu" ]; then

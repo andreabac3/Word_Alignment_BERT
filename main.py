@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from WordAlignment import WordAlignment
 
 if __name__ == "__main__":
@@ -9,9 +10,7 @@ if __name__ == "__main__":
     for (sentence1_w, sentence2_w) in decoded:
         print(sentence1_w, "\t--->", sentence2_w)
 
-    print("-"*35)
-
+    print("-" * 35)
     _, decoded = wa.get_alignment(sentence2, sentence1, calculate_decode=True)
     for (sentence2_w, sentence1_w) in decoded:
         print(sentence2_w, "\t--->", sentence1_w)
-
