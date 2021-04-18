@@ -3,24 +3,27 @@ from typing import List, Tuple
 import torch
 from torch.nn.functional import cosine_similarity
 from torch_scatter import scatter_mean
-from transformers import BertModel, BertTokenizer
+from transformers import AutoModel, AutoTokenizer
 
 
 class WordAlignment:
-    def __init__(self, model_name: str, tokenizer_name: str):
-        self.model: BertModel = BertModel.from_pretrained(model_name, output_hidden_states=True)
-        self.tokenizer: BertTokenizer = BertTokenizer.from_pretrained(tokenizer_name)
+    def __init__(self, model_name: str, tokenizer_name: str, device: str, fp16: bool):
+        assert (device == 'cpu' and not fp16) or (device != 'cpu'), "You can't use fp16 with CPU device."
+        self.model: AutoModel = AutoModel.from_pretrained(model_name, output_hidden_states=True).to(device)
+        self.tokenizer: AutoTokenizer = AutoTokenizer.from_pretrained(tokenizer_name) 
         self.model.eval()
+        if fp16:
+            self.model = self.model.half()
 
     def bert_tokenizer(self, sentence: List[str]):
-        sentence_tokenized = self.tokenizer(" ".join(sentence), return_tensors="pt")
+        sentence_tokenized = self.tokenizer(" ".join(sentence), return_tensors="pt").to(self.model.device)
         indices: List[int] = self.indices_word_pieces(sentence)
         return sentence_tokenized, indices
 
     def get_sentence_representation(self, sentence: List[str]) -> torch.Tensor:
         encoded_input, indices = self.bert_tokenizer(sentence)
         out_bert: torch.Tensor = self.bert_forward(encoded_input)
-        return scatter_mean(out_bert, index=torch.tensor(indices), dim=1)
+        return scatter_mean(out_bert, index=torch.LongTensor(indices).to(self.model.device), dim=1)
 
     @staticmethod
     def obtain_cosine_similarity_matrix(source, target):

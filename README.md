@@ -10,7 +10,7 @@ See the main.py file to run an example
 sentence1 = "Today I went to the supermarket to buy apples".split()
 sentence2 = "Oggi io sono andato al supermercato a comprare le mele".split()
 BERT_NAME = "bert-base-multilingual-cased"
-wa = WordAlignment(model_name=BERT_NAME, tokenizer_name=BERT_NAME)
+wa = WordAlignment(model_name=BERT_NAME, tokenizer_name=BERT_NAME, device='cpu', fp16=False)
 _, decoded = wa.get_alignment(sentence1, sentence2, calculate_decode=True)
 for (sentence1_w, sentence2_w) in decoded:
     print(sentence1_w, "\t--->", sentence2_w)
@@ -31,6 +31,10 @@ apples          ---> mele
 The signature of the function is ```List[str], List[str], bool -> Tuple[List[int], List[List[str]]]```<br>
 To speed up the computation you can avoid calculating the decoding posing the boolean value to False.<br>
 If calculate_decode is False the second value returned will be None.
+
+### FP16 Support
+The WordAlignment support FP16 but we discourage their use.
+
 ## How to install 
 The Word Alignment is fully compatible with NVIDIA CUDA.<br>
 To use CUDA you have to install the CUDA version of Torch-Scatter lib, I made a simple script to automate it
